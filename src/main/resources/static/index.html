@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="topbar">
+        <div class="container topbar-inner">
+            <div class="brand">
+                <div class="brand-mark"></div>
+                <div>
+                    <h1>Task Manager</h1>
+                    <p class="subtitle">API REST · Spring Boot · JPA</p>
+                </div>
+            </div>
+            <nav class="tabs" role="tablist">
+                <button class="tab active" data-tab="tasks" role="tab">Tarefas</button>
+                <button class="tab" data-tab="categories" role="tab">Categorias</button>
+                <button class="tab" data-tab="metrics" role="tab">Métricas</button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+
+        <!-- TASKS -->
+        <section class="panel" id="panel-tasks">
+            <div class="panel-head">
+                <h2>Tarefas</h2>
+                <div class="filters">
+                    <select id="filter-status">
+                        <option value="">Todos os status</option>
+                        <option value="PENDING">Pendente</option>
+                        <option value="IN_PROGRESS">Em andamento</option>
+                        <option value="DONE">Concluída</option>
+                        <option value="CANCELLED">Cancelada</option>
+                    </select>
+                    <select id="filter-priority">
+                        <option value="">Todas as prioridades</option>
+                        <option value="LOW">Baixa</option>
+                        <option value="MEDIUM">Média</option>
+                        <option value="HIGH">Alta</option>
+                        <option value="URGENT">Urgente</option>
+                    </select>
+                    <button class="btn btn-secondary" id="btn-reload-tasks">Atualizar</button>
+                </div>
+            </div>
+
+            <form class="card form" id="task-form">
+                <input type="hidden" id="task-id">
+                <div class="row">
+                    <div class="field grow">
+                        <label for="task-title">Título *</label>
+                        <input type="text" id="task-title" maxlength="120" required>
+                    </div>
+                    <div class="field">
+                        <label for="task-due">Vencimento</label>
+                        <input type="date" id="task-due">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="field">
+                        <label for="task-priority">Prioridade</label>
+                        <select id="task-priority">
+                            <option value="LOW">Baixa</option>
+                            <option value="MEDIUM" selected>Média</option>
+                            <option value="HIGH">Alta</option>
+                            <option value="URGENT">Urgente</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="task-status">Status</label>
+                        <select id="task-status">
+                            <option value="PENDING" selected>Pendente</option>
+                            <option value="IN_PROGRESS">Em andamento</option>
+                            <option value="DONE">Concluída</option>
+                            <option value="CANCELLED">Cancelada</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="task-category">Categoria</label>
+                        <select id="task-category">
+                            <option value="">— sem categoria —</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="task-desc">Descrição</label>
+                    <textarea id="task-desc" rows="2" maxlength="1000"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-ghost" id="task-cancel" hidden>Cancelar edição</button>
+                    <button type="submit" class="btn btn-primary" id="task-submit">Adicionar tarefa</button>
+                </div>
+            </form>
+
+            <div class="card list" id="task-list">
+                <div class="empty">Carregando…</div>
+            </div>
+        </section>
+
+        <!-- CATEGORIES -->
+        <section class="panel hidden" id="panel-categories">
+            <div class="panel-head">
+                <h2>Categorias</h2>
+            </div>
+
+            <form class="card form" id="category-form">
+                <input type="hidden" id="category-id">
+                <div class="row">
+                    <div class="field grow">
+                        <label for="category-name">Nome *</label>
+                        <input type="text" id="category-name" maxlength="60" required>
+                    </div>
+                </div>
+                <div class="field">
+                    <label for="category-desc">Descrição</label>
+                    <input type="text" id="category-desc" maxlength="200">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-ghost" id="category-cancel" hidden>Cancelar edição</button>
+                    <button type="submit" class="btn btn-primary" id="category-submit">Adicionar categoria</button>
+                </div>
+            </form>
+
+            <div class="card list" id="category-list">
+                <div class="empty">Carregando…</div>
+            </div>
+        </section>
+
+        <!-- METRICS -->
+        <section class="panel hidden" id="panel-metrics">
+            <div class="panel-head">
+                <h2>Métricas</h2>
+                <button class="btn btn-secondary" id="btn-reload-metrics">Atualizar</button>
+            </div>
+
+            <div class="metrics-grid" id="metrics-overview">
+                <div class="empty">Carregando…</div>
+            </div>
+
+            <div class="metrics-cols">
+                <div class="card">
+                    <h3>Por status</h3>
+                    <div id="metrics-status"></div>
+                </div>
+                <div class="card">
+                    <h3>Por prioridade</h3>
+                    <div id="metrics-priority"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="toast" class="toast" hidden></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
