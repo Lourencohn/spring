@@ -6,20 +6,28 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+// Entidade principal do domínio.
+// @Table(name = "tasks") fixa o nome da tabela como 'tasks' (no plural).
+// Sem isso, o Hibernate usaria o naming strategy padrão e a tabela seria 'task'.
 @Entity
 @Table(name = "tasks")
 public class Task {
 
+    // IDENTITY deixa o banco gerar o id (AUTO_INCREMENT no H2/MySQL, SERIAL no Postgres).
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // length define o VARCHAR no banco. Mantenho coerente com o @Size no DTO.
     @Column(nullable = false, length = 120)
     private String title;
 
     @Column(length = 1000)
     private String description;
 
+    // EnumType.STRING grava o nome do enum no banco ('HIGH', 'URGENT') ao invés
+    // do ordinal (0, 1, 2). É mais seguro: se eu reordenar o enum, os dados antigos
+    // não viram outra coisa silenciosamente.
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private Priority priority;
@@ -30,15 +38,24 @@ public class Task {
 
     private LocalDate dueDate;
 
+    // updatable = false impede que esse campo seja alterado em um UPDATE.
+    // Garante que ninguém vai sobrescrever a data de criação por acidente.
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     private LocalDateTime completedAt;
 
+    // FetchType.LAZY porque o default do @ManyToOne é EAGER, e eu não quero
+    // que TODA consulta a Task traga a categoria junto. Quando precisar da categoria,
+    // chamo task.getCategory() e o Hibernate faz a query lazy.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     private Category category;
 
+    // Hook do JPA que roda ANTES do INSERT.
+    // Garanto que createdAt e os defaults de status/priority estão preenchidos
+    // mesmo que o caller esqueça de setar. Isso protege a invariante da entidade
+    // independente de quem criou.
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
@@ -50,6 +67,9 @@ public class Task {
         }
     }
 
+    // Método de domínio. Conclui a tarefa setando status E completedAt no mesmo átomo.
+    // Coloquei aqui (em vez de no service) pra encapsular a regra "concluir significa
+    // mudar o status E marcar a data". Impossível esquecer um dos dois.
     public void markAsDone() {
         this.status = TaskStatus.DONE;
         this.completedAt = LocalDateTime.now();

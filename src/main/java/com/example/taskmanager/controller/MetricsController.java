@@ -6,6 +6,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+// Endpoint só de leitura pra alimentar o dashboard de métricas.
+// Mantive separado do TaskController porque é uma responsabilidade diferente:
+// não é CRUD de tarefa, é uma visão agregada.
 @RestController
 @RequestMapping("/api/metrics")
 public class MetricsController {
@@ -16,6 +19,8 @@ public class MetricsController {
         this.metricsService = metricsService;
     }
 
+    // GET /api/metrics
+    // Retorna totais por status, por prioridade, taxa de conclusão e tarefas atrasadas.
     @GetMapping
     public MetricsResponse getMetrics() {
         return metricsService.getMetrics();

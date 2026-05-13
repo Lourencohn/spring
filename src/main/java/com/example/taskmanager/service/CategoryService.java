@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+// Service de Category. Mesmo padrão do TaskService: @Transactional na classe
+// e readOnly = true nos métodos de leitura.
 @Service
 @Transactional
 public class CategoryService {
@@ -33,6 +35,9 @@ public class CategoryService {
         return toResponse(getCategory(id));
     }
 
+    // Cria uma nova categoria.
+    // Valido pelo nome antes de salvar pra dar uma mensagem amigável,
+    // ao invés de deixar o banco lançar uma exception de constraint violation feia.
     public CategoryResponse create(CategoryRequest request) {
         if (categoryRepository.existsByNameIgnoreCase(request.name())) {
             throw new BusinessException("Já existe uma categoria com o nome '" + request.name() + "'");
@@ -41,6 +46,9 @@ public class CategoryService {
         return toResponse(categoryRepository.save(category));
     }
 
+    // Update tem uma sutileza: preciso verificar duplicidade só se o nome
+    // estiver sendo trocado por um nome de OUTRA categoria. O filter() garante
+    // que se eu estiver atualizando a própria categoria com o mesmo nome, passa.
     public CategoryResponse update(Long id, CategoryRequest request) {
         Category category = getCategory(id);
         categoryRepository.findByNameIgnoreCase(request.name())
@@ -50,9 +58,12 @@ public class CategoryService {
                 });
         category.setName(request.name());
         category.setDescription(request.description());
+        // Sem save() de novo, dirty checking cuida disso no commit da transação.
         return toResponse(category);
     }
 
+    // Delete protegido: bloqueia se ainda houver tarefas vinculadas.
+    // Evita deixar tarefas órfãs ou um ON DELETE CASCADE acidental no banco.
     public void delete(Long id) {
         Category category = getCategory(id);
         if (!category.getTasks().isEmpty()) {
@@ -61,6 +72,9 @@ public class CategoryService {
         categoryRepository.delete(category);
     }
 
+    // Método público porque o TaskService precisa dele pra resolver a categoria
+    // ao criar/atualizar uma tarefa (mantém a regra "categoria precisa existir"
+    // num lugar só).
     public Category getCategory(Long id) {
         return categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria", id));
