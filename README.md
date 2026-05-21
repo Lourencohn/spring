@@ -174,7 +174,7 @@ Toda exceção tratada pelo `GlobalExceptionHandler` retorna o mesmo envelope, o
 
 Quando é uma validação de campo, o array `fieldErrors` vem preenchido com o nome do campo e a mensagem. Em outros tipos de erro, esse array fica vazio e a explicação vai no `message`.
 
-## Decisões de design (e como defender numa entrevista)
+## Decisões de design
 
 Essa seção é a parte mais importante pra quem vai apresentar. Cada decisão técnica abaixo tem motivo, e saber explicar é o que separa "usei porque o tutorial mandou" de "entendo o que estou fazendo".
 
